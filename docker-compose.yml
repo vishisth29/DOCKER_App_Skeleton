@@ -1,0 +1,43 @@
+version: '2'
+
+services:
+  nginx_demo:
+    container_name: nginx_demo_container
+    restart: always
+    image: nginx
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    volumes:
+     - ./frontend/dist:/usr/share/nginx/html
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - flask_demo
+
+  flask_demo:
+    container_name: flask_demo_container
+    restart: always
+    image: flask
+    build: ./backend
+    volumes:
+    - ./backend:/usr/src/app/server
+    env_file:
+     - .env
+  data:
+   container_name: app_data_demo_container
+   image: postgres:9.6
+   volumes:
+     - /var/lib/postgresql
+   command: "true"
+  postgres:
+   container_name: postgresql_demo_container
+   restart: always
+   build: ./postgresql
+   volumes_from:
+     - data
+   ports:
+     - "5432:5432"
+   env_file:
+     - .env
